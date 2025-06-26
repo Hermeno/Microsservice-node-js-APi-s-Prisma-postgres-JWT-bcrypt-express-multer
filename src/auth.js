@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
-const auth = (req, res, next) => {  // ✅ Agora com "next"
+const auth = (req, res, next) => { 
 
     const token = req.headers.authorization;
 
@@ -13,7 +13,7 @@ const auth = (req, res, next) => {  // ✅ Agora com "next"
     try {
         const decoded = jwt.verify(token.replace('Bearer ', '').trim(), JWT_SECRET);
 
-        req.userId = decoded.id;  // ✅ Adicionando o ID do usuário ao objeto de requisição
+        req.userId = decoded.id; 
         next();
     } catch (error) {
         return res.status(401).json({ message: 'Token inválido' });
