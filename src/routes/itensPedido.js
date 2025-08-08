@@ -1,63 +1,103 @@
-// Exemplo base de endpoints para todas as tabelas (Express + Prisma)
 const express = require('express');
 const router = express.Router();
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-// Substitua "itensPedido" por cada nome de modelo
+const toInt = (val) => {
+  const parsed = parseInt(val, 10);
+  return isNaN(parsed) ? null : parsed;
+};
 
-// CREATE
+// ✅ CREATE
 router.post('/', async (req, res) => {
+  const { pedido_id, produto_id, quantidade, preco_unitario } = req.body;
+
   try {
-    const data = req.body;
-    const created = await prisma.itensPedido.create({ data });
+    const created = await prisma.itensPedido.create({
+      data: {
+        pedido_id,
+        produto_id,
+        quantidade,
+        preco_unitario,
+      },
+    });
+
     res.status(201).json(created);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 });
 
-// READ ALL
+// ✅ READ ALL
 router.get('/', async (req, res) => {
   try {
-    const items = await prisma.itensPedido.findMany();
+    const items = await prisma.itensPedido.findMany({
+      include: {
+        pedido: true,
+        produto: true,
+      },
+    });
+
     res.status(200).json(items);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-// READ BY ID
+// ✅ READ BY ID
 router.get('/:id', async (req, res) => {
+  const id = toInt(req.params.id);
+  if (!id) return res.status(400).json({ error: 'ID inválido.' });
+
   try {
     const item = await prisma.itensPedido.findUnique({
-      where: { id: parseInt(req.params.id) },
+      where: { id },
+      include: {
+        pedido: true,
+        produto: true,
+      },
     });
-    if (!item) return res.status(404).json({ error: 'Not found' });
+
+    if (!item) return res.status(404).json({ error: 'Item não encontrado.' });
+
     res.json(item);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-// UPDATE
+// ✅ UPDATE
 router.put('/:id', async (req, res) => {
+  const id = toInt(req.params.id);
+  if (!id) return res.status(400).json({ error: 'ID inválido.' });
+
+  const { pedido_id, produto_id, quantidade, preco_unitario } = req.body;
+
   try {
     const updated = await prisma.itensPedido.update({
-      where: { id: parseInt(req.params.id) },
-      data: req.body,
+      where: { id },
+      data: {
+        pedido_id,
+        produto_id,
+        quantidade,
+        preco_unitario,
+      },
     });
+
     res.json(updated);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 });
 
-// DELETE
+// ✅ DELETE
 router.delete('/:id', async (req, res) => {
+  const id = toInt(req.params.id);
+  if (!id) return res.status(400).json({ error: 'ID inválido.' });
+
   try {
-    await prisma.itensPedido.delete({ where: { id: parseInt(req.params.id) } });
-    res.status(204).send();
+    await prisma.itensPedido.delete({ where: { id } });
+    res.status(204).end();
   } catch (error) {
     res.status(400).json({ error: error.message });
   }

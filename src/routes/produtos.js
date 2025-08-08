@@ -1,10 +1,12 @@
-// Exemplo base de endpoints para todas as tabelas (Express + Prisma)
 const express = require('express');
 const router = express.Router();
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-// Substitua "produtos" por cada nome de modelo
+const toInt = (val) => {
+  const parsed = parseInt(val, 10);
+  return isNaN(parsed) ? null : parsed;
+};
 
 // CREATE
 router.post('/', async (req, res) => {
@@ -20,7 +22,12 @@ router.post('/', async (req, res) => {
 // READ ALL
 router.get('/', async (req, res) => {
   try {
-    const items = await prisma.produtos.findMany();
+    const items = await prisma.produtos.findMany({
+      include: {
+        estabelecimento: true,
+        categoria: true
+      }
+    });
     res.status(200).json(items);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -29,11 +36,20 @@ router.get('/', async (req, res) => {
 
 // READ BY ID
 router.get('/:id', async (req, res) => {
+  const id = toInt(req.params.id);
+  if (!id) return res.status(400).json({ error: 'ID inválido.' });
+
   try {
     const item = await prisma.produtos.findUnique({
-      where: { id: parseInt(req.params.id) },
+      where: { id },
+      include: {
+        estabelecimento: true,
+        categoria: true
+      }
     });
-    if (!item) return res.status(404).json({ error: 'Not found' });
+
+    if (!item) return res.status(404).json({ error: 'Produto não encontrado.' });
+
     res.json(item);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -42,9 +58,12 @@ router.get('/:id', async (req, res) => {
 
 // UPDATE
 router.put('/:id', async (req, res) => {
+  const id = toInt(req.params.id);
+  if (!id) return res.status(400).json({ error: 'ID inválido.' });
+
   try {
     const updated = await prisma.produtos.update({
-      where: { id: parseInt(req.params.id) },
+      where: { id },
       data: req.body,
     });
     res.json(updated);
@@ -55,9 +74,12 @@ router.put('/:id', async (req, res) => {
 
 // DELETE
 router.delete('/:id', async (req, res) => {
+  const id = toInt(req.params.id);
+  if (!id) return res.status(400).json({ error: 'ID inválido.' });
+
   try {
-    await prisma.produtos.delete({ where: { id: parseInt(req.params.id) } });
-    res.status(204).send();
+    await prisma.produtos.delete({ where: { id } });
+    res.status(204).end();
   } catch (error) {
     res.status(400).json({ error: error.message });
   }

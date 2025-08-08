@@ -1,63 +1,91 @@
-// Exemplo base de endpoints para todas as tabelas (Express + Prisma)
 const express = require('express');
 const router = express.Router();
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-// Substitua "categorias" por cada nome de modelo
+// Utilitário seguro para converter ID
+const toInt = (value) => {
+  const parsed = parseInt(value, 10);
+  return isNaN(parsed) ? null : parsed;
+};
 
-// CREATE
+// ✅ CREATE Categoria
 router.post('/', async (req, res) => {
+  const { nome } = req.body;
+
+  if (!nome) {
+    return res.status(400).json({ error: 'Campo "nome" é obrigatório.' });
+  }
+
   try {
-    const data = req.body;
-    const created = await prisma.categorias.create({ data });
-    res.status(201).json(created);
+    const categoria = await prisma.categorias.create({ data: { nome } });
+    res.status(201).json(categoria);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 });
 
-// READ ALL
+// ✅ READ ALL Categorias
 router.get('/', async (req, res) => {
   try {
-    const items = await prisma.categorias.findMany();
-    res.status(200).json(items);
+    const categorias = await prisma.categorias.findMany({
+      include: { produtos: true } // caso queira incluir os produtos
+    });
+    res.json(categorias);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-// READ BY ID
+// ✅ READ Categoria por ID
 router.get('/:id', async (req, res) => {
+  const id = toInt(req.params.id);
+  if (!id) return res.status(400).json({ error: 'ID inválido.' });
+
   try {
-    const item = await prisma.categorias.findUnique({
-      where: { id: parseInt(req.params.id) },
+    const categoria = await prisma.categorias.findUnique({
+      where: { id },
+      include: { produtos: true }
     });
-    if (!item) return res.status(404).json({ error: 'Not found' });
-    res.json(item);
+
+    if (!categoria) {
+      return res.status(404).json({ error: 'Categoria não encontrada.' });
+    }
+
+    res.json(categoria);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-// UPDATE
+// ✅ UPDATE Categoria
 router.put('/:id', async (req, res) => {
+  const id = toInt(req.params.id);
+  const { nome } = req.body;
+
+  if (!id) return res.status(400).json({ error: 'ID inválido.' });
+  if (!nome) return res.status(400).json({ error: 'Campo "nome" é obrigatório.' });
+
   try {
-    const updated = await prisma.categorias.update({
-      where: { id: parseInt(req.params.id) },
-      data: req.body,
+    const categoria = await prisma.categorias.update({
+      where: { id },
+      data: { nome }
     });
-    res.json(updated);
+
+    res.json(categoria);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 });
 
-// DELETE
+// ✅ DELETE Categoria
 router.delete('/:id', async (req, res) => {
+  const id = toInt(req.params.id);
+  if (!id) return res.status(400).json({ error: 'ID inválido.' });
+
   try {
-    await prisma.categorias.delete({ where: { id: parseInt(req.params.id) } });
-    res.status(204).send();
+    await prisma.categorias.delete({ where: { id } });
+    res.status(204).end();
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
