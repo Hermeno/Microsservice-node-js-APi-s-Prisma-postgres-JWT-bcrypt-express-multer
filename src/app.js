@@ -1,47 +1,44 @@
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
-
 const express = require('express');
 const auth = require('./auth');
-// import auth from './auth.js'
-const app = express();
-app.use(express.json());
+
+class AppServer {
+  constructor() {
+    this.app = express();
+    this.config();
+    this.routes();
+  }
+
+  config() {
+    this.app.use(express.json());
+  }
+
+  routes() {
+    // CORREÇÃO: usar this.app
+    this.app.use('/clientes', require('./routes/clientes/clientes'));
+    this.app.use('/categorias', require('./routes/categorias/categorias'));
+    this.app.use('/pedidos', require('./routes/pedidos/pedidos'));
+    this.app.use('/produtos', require('./routes/products/produtos'));
+    this.app.use('/estabelecimentos', require('./routes/estabelecimentos/estabelecimentos'));
+    this.app.use('/historicoBenefios', require('./routes/historicoBeneficios/historicoBeneficios'));
+    this.app.use('/historicoPedidos', require('./routes/historicosRelatorio/historicoRelatorios'));
+    this.app.use('/itensPedido', require('./routes/itensPedido/itensPedido'));
+    this.app.use('/mesas', require('./routes/mesas/mesas'));
+    this.app.use('/monitoramento', require('./routes/monitoramento/monitoramentoSistema'));
+    this.app.use('/payment', require('./routes/payment/pagamentos'));
 
 
-// app.use('/clientes', auth, require('./routes/clientes'));
-app.use('/usuarios-internos', require('./routes/usuariosInternos'));
-// app.use('/estabelecimentos', auth, require('./routes/estabelecimentos'));
-// app.use('/mesas', auth, require('./routes/mesas'));
-app.use('/usuarios-finais', require('./routes/usuariosFinais'));
-// app.use('/categorias', auth, require('./routes/categorias'));
-// app.use('/produtos', auth, require('./routes/produtos'));
-// app.use('/pedidos', auth, require('./routes/pedidos'));
-// app.use('/itens-pedido', auth, require('./routes/itensPedido'));
-// app.use('/historico-beneficios', auth, require('./routes/historicoBeneficios'));
-// app.use('/pagamentos', auth, require('./routes/pagamentos'));
-// app.use('/acessos-qrcode', auth, require('./routes/acessosQrcode'));
-// app.use('/log-admin', auth, require('./routes/logAdmin'));
-// app.use('/historico-relatorios', auth, require('./routes/historicoRelatorios'));
-// app.use('/monitoramento-sistema', auth, require('./routes/monitoramentoSistema'));
+    this.app.use('/auth', auth); 
+  }
 
+  start() {
+    const PORT = process.env.PORT || 3000;
+    this.app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  }
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+const server = new AppServer();
+server.start();
