@@ -2,7 +2,7 @@ name: 🚀 Deploy API Node.js no cPanel
 
 on:
   push:
-    branches: [ "main" ]  # roda sempre que fizer push na branch main
+    branches: [ "master" ]  # roda sempre que fizer push na branch main
 
 jobs:
   deploy:
