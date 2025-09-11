@@ -1,0 +1,23 @@
+name: 🚀 Deploy API Node.js no cPanel
+
+on:
+  push:
+    branches: [ "main" ]  # roda sempre que fizer push na branch main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Conectar no servidor e fazer deploy
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.CPANEL_HOST }}   # exemplo: 177.70.6.178
+          username: ${{ secrets.CPANEL_USER }} # exemplo: useoxcombr
+          key: ${{ secrets.CPANEL_KEY }}       # chave privada ssh
+          script: |
+            cd ~/api  # ajuste para o diretório onde o projeto foi clonado no servidor
+            git pull origin main
+            npm install --production
+            npx prisma migrate deploy
+            touch tmp/restart.txt || true
