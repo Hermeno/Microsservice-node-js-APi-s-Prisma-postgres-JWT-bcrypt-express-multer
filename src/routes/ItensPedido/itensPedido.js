@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const asyncHandler = require('../../asyncHandler');
 
 const addItem = require('./add');
 const { getAll, getById } = require('./select');
@@ -7,10 +8,10 @@ const updateItem = require('./update');
 const deleteItem = require('./del');
 
 // Rotas
-router.post('/', addItem);
-router.get('/', getAll);
-router.get('/:id', getById);
-router.put('/:id', updateItem);
-router.delete('/:id', deleteItem);
+router.post('/', asyncHandler(addItem));
+router.get('/', asyncHandler(getAll));
+router.get('/:id', asyncHandler(getById));
+router.put('/:id', asyncHandler(updateItem));
+router.delete('/:id', asyncHandler(deleteItem));
 
 module.exports = router;

@@ -7,6 +7,6 @@ module.exports = async (req, res) => {
     const created = await prisma.mesas.create({ data });
     res.status(201).json(created);
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    throw error;
   }
 };

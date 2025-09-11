@@ -63,7 +63,8 @@ class UsuariosFinaisController {
 
 const usuariosFinaisController = new UsuariosFinaisController();
 
-router.post('/cadastro-usuario-final', (req, res) => usuariosFinaisController.cadastroUsuarioFinal(req, res));
-router.post('/login-usuario-final', (req, res) => usuariosFinaisController.loginUsuarioFinal(req, res));
+router.post('/', (req, res) => usuariosFinaisController.cadastroUsuarioFinal(req, res));
+router.post('/login', (req, res) => usuariosFinaisController.loginUsuarioFinal(req, res));
+
 
 module.exports = router;

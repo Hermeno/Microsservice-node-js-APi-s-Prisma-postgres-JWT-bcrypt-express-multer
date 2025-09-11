@@ -2,14 +2,15 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 async function deleteCliente(req, res) {
+   const id = parseInt(req.params.id); 
   try {
     await prisma.clientes.delete({
-      where: { id: idInt(req.params.id) }
+      where: { id: id }
     });
 
     res.status(204).end();
   } catch (e) {
-    tratarErroPrisma(e, res, 'cliente');
+    throw e;
   }
 }
 

@@ -62,7 +62,7 @@ class UsuariosInternosController {
 
 const usuariosInternosController = new UsuariosInternosController();
 
-router.post('/cadastro_usuarios_internos', (req, res) => usuariosInternosController.cadastroUsuariosInternos(req, res));
-router.get('/login_usuarios_internos', (req, res) => usuariosInternosController.loginUsuariosInternos(req, res));
+router.post('/', (req, res) => usuariosInternosController.cadastroUsuariosInternos(req, res));
+router.post('/login', (req, res) => usuariosInternosController.loginUsuariosInternos(req, res));
 
 module.exports = router;

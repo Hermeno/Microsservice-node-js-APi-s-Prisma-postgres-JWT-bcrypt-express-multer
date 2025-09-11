@@ -13,14 +13,15 @@ async function getClientes(req, res) {
     });
     res.json(clientes);
   } catch (e) {
-    tratarErroPrisma(e, res, 'cliente');
+    throw e;
   }
 }
 
 async function getClienteById(req, res) {
+   const id = parseInt(req.params.id); 
   try {
     const cliente = await prisma.clientes.findUnique({
-      where: { id: idInt(req.params.id) },
+      where: { id: id },
       include: {
         usuarios_internos: true,
         estabelecimentos: true,
@@ -35,7 +36,7 @@ async function getClienteById(req, res) {
       res.status(404).json({ error: 'Cliente não encontrado' });
     }
   } catch (e) {
-    tratarErroPrisma(e, res, 'cliente');
+    throw e;
   }
 }
 

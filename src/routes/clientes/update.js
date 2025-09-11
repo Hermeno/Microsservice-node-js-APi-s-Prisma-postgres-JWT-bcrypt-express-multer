@@ -14,7 +14,7 @@ async function updateCliente(req, res) {
 
     res.json(cliente);
   } catch (e) {
-    tratarErroPrisma(e, res, 'cliente');
+    throw e;
   }
 }
 

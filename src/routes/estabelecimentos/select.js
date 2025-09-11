@@ -13,7 +13,7 @@ exports.getAll = async (req, res) => {
     });
     res.status(200).json(estabelecimentos);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    throw e;
   }
 };
 
@@ -33,6 +33,6 @@ exports.getById = async (req, res) => {
 
     res.json(estabelecimento);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    throw e;
   }
 };

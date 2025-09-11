@@ -20,6 +20,6 @@ module.exports = async (req, res) => {
 
     res.json(updated);
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    throw e;
   }
 };
