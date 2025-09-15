@@ -1,4 +1,4 @@
-name: deploy da api microserviço em nodejs para o servidor via ftp
+name: deploy completo da app micrservico
 on: 
   push:
     branches:
