@@ -1,30 +1,27 @@
-name: Deploy completo API Node.js now using SSH
+name: Deploy Node.js app via SSH
 
 on:
   push:
     branches:
-      - master   # roda sempre que fizer push na master
+      - master
 
 jobs:
   deploy:
-    name: 🎉 Deploy completo via SSH
     runs-on: ubuntu-latest
-
     steps:
-      # 1️⃣ Pega o código do GitHub
-      - name: 🚚 Checkout code
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2️⃣ Conecta no servidor via SSH e faz deploy completo
-      - name: 🚀 Deploy via SSH
+      - name: Deploy via SSH
         uses: appleboy/ssh-action@v0.1.10
         with:
-          host: ${{ secrets.CPANEL_HOST }}       # IP ou domínio do servidor
-          username: ${{ secrets.CPANEL_USER }}   # Usuário do cPanel
-          key: ${{ secrets.SSH_PRIVATE_KEY }}         # Chave privada SSH
+          host: ${{ secrets.HOST }}                # IP ou domínio do servidor
+          username: ${{ secrets.USERNAME }}        # Usuário SSH
+          key: ${{ secrets.SSH_PRIVATE_KEY }}      # Sua chave privada sem passphrase
+          port: 22
           script: |
-            # Navega até a pasta da aplicação
-            cd ~/hermeno   # ajuste para o diretório da sua app
+            # Navega até a pasta da app
+            cd ~/hermeno/public_html
 
             # Atualiza o código
             git pull origin master
@@ -35,4 +32,5 @@ jobs:
             # Aplica migrações do Prisma
             npx prisma migrate deploy
 
-            # Reinicia a a
+            # Reinicia a aplicação (exemplo usando PM2)
+            pm2 restart all
