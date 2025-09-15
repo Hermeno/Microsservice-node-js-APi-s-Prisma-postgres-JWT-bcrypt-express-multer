@@ -15,8 +15,8 @@ jobs:
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v0.1.10
         with:
-          host: ${{ secrets.HOST }}                # IP ou domínio do servidor
-          username: ${{ secrets.USERNAME }}        # Usuário SSH
+          host: ${{ secrets.CPANEL_HOST }}                # IP ou domínio do servidor
+          username: ${{ secrets.CPANEL_USER }}        # Usuário SSH
           key: ${{ secrets.SSH_PRIVATE_KEY }}      # Sua chave privada sem passphrase
           port: 22
           script: |
