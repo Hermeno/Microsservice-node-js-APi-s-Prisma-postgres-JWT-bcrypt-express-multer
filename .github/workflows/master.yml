@@ -1,4 +1,4 @@
-name: Deploy Node.js app via SSH
+name: 🚀 Deploy completo da API Node.js
 
 on:
   push:
@@ -7,30 +7,26 @@ on:
 
 jobs:
   deploy:
+    name: 🎉 Deploy via SSH
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+    - name: 🚚 Checkout do código
+      uses: actions/checkout@v4
 
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v0.1.10
-        with:
-          host: ${{ secrets.CPANEL_HOST }}                # IP ou domínio do servidor
-          username: ${{ secrets.CPANEL_USER }}        # Usuário SSH
-          key: ${{ secrets.SSH_PRIVATE_KEY }}      # Sua chave privada sem passphrase
-          port: 22
-          script: |
-            # Navega até a pasta da app
-            cd ~/hermeno/public_html
-
-            # Atualiza o código
-            git pull origin master
-
-            # Instala dependências
-            npm install --production
-
-            # Aplica migrações do Prisma
-            npx prisma migrate deploy
-
-            # Reinicia a aplicação (exemplo usando PM2)
-            pm2 restart all
+    - name: 🛠 Deploy via SSH
+      uses: appleboy/ssh-action@v0.1.10
+      with:
+        host: ${{ secrets.CPANEL_HOST }}
+        username: ${{ secrets.CPANEL_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        port: 22
+        script: |
+          cd ~/hermeno/public_html
+          echo "Atualizando código..."
+          git pull origin master
+          echo "Instalando dependências..."
+          npm install --production
+          echo "Aplicando migrações do Prisma..."
+          npx prisma migrate deploy
+          echo "Reiniciando aplicação com PM2..."
+          pm2 restart minha-api || pm2 start src/app.js --name minha-api
