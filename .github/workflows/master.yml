@@ -21,7 +21,7 @@ jobs:
         with:
           host: ${{ secrets.CPANEL_HOST }}       # IP ou domínio do servidor
           username: ${{ secrets.CPANEL_USER }}   # Usuário do cPanel
-          key: ${{ secrets.CPANEL_KEY }}         # Chave privada SSH
+          key: ${{ secrets.SSH_PRIVATE_KEY }}         # Chave privada SSH
           script: |
             # Navega até a pasta da aplicação
             cd ~/hermeno   # ajuste para o diretório da sua app
