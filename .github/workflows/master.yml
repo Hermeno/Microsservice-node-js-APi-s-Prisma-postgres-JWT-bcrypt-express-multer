@@ -13,7 +13,7 @@ jobs:
       - name: 🚚 Checkout do código
         uses: actions/checkout@v4
 
-      - name: 🛡️ Deploy via SSH com backup e logs
+      - name: 🛡️ Deploy via SSH com backup, logs e variáveis
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.CPANEL_HOST }}
@@ -24,6 +24,7 @@ jobs:
             NODE_ENV=production
             DATABASE_URL=${{ secrets.DATABASE_URL }}
             JWT_SECRET=${{ secrets.JWT_SECRET }}
+            API_PORT=3000
           script: |
             set -e  # interrompe se algum comando falhar
             echo "======================================="
@@ -33,12 +34,20 @@ jobs:
             # Diretórios
             APP_DIR=~/hermeno/public_html
             BACKUP_DIR=~/hermeno/backup_$(date +%Y%m%d%H%M%S)
+            LOG_DIR=~/hermeno/deploy_logs
+            mkdir -p $LOG_DIR
 
             # Backup rápido
             echo "Criando backup da aplicação..."
             mkdir -p $BACKUP_DIR
             cp -r $APP_DIR/* $BACKUP_DIR/
             echo "Backup salvo em $BACKUP_DIR"
+
+            # Limpeza de cache antigo
+            echo "Removendo node_modules antigo e cache..."
+            rm -rf $APP_DIR/node_modules
+            rm -rf $APP_DIR/.next  # se estiver usando Next.js ou build cache
+            rm -rf $APP_DIR/dist   # se estiver usando build TypeScript
 
             # Atualiza o código
             echo "Atualizando código..."
@@ -50,13 +59,22 @@ jobs:
             echo "Instalando dependências..."
             npm install --production
 
+            # Verifica arquivos importantes
+            echo "Listando arquivos principais..."
+            ls -l $APP_DIR
+            ls -l $APP_DIR/node_modules
+
             # Aplica migrações do Prisma
             echo "Aplicando migrações do Prisma..."
             npx prisma migrate deploy
 
             # Reinicia a aplicação com PM2
             echo "Reiniciando aplicação com PM2..."
-            pm2 restart minha-api || pm2 start src/app.js --name minha-api
+            pm2 describe minha-api >/dev/null 2>&1 && pm2 restart minha-api || pm2 start src/app.js --name minha-api
+
+            # Salva log do deploy
+            echo "Salvando log do deploy..."
+            date > $LOG_DIR/deploy_$(date +%Y%m%d%H%M%S).log
 
             echo "======================================="
             echo "✅ Deploy concluído com sucesso!"
