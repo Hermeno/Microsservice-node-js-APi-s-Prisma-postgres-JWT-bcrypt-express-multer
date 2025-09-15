@@ -1,22 +1,38 @@
-name: deploy completo da app micrservico
-on: 
+name: Deploy completo API Node.js now using SSH
+
+on:
   push:
     branches:
-      - master
+      - master   # roda sempre que fizer push na master
 
 jobs:
-  web-deploy:
-    name: 🎉 Deploy
+  deploy:
+    name: 🎉 Deploy completo via SSH
     runs-on: ubuntu-latest
+
     steps:
-    - name: 🚚 Get latest code
-      uses: actions/checkout@v4
-    
-    - name: 📂 Sync files
-      uses: SamKirkland/FTP-Deploy-Action@v4.3.6
-      with:
-        server: ${{ secrets.ftp_server }}
-        username: ${{ secrets.ftp_username }}
-        password: ${{ secrets.ftp_password }}
-        protocol: ftps
-        server-dir: /public_html/
+      # 1️⃣ Pega o código do GitHub
+      - name: 🚚 Checkout code
+        uses: actions/checkout@v4
+
+      # 2️⃣ Conecta no servidor via SSH e faz deploy completo
+      - name: 🚀 Deploy via SSH
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.CPANEL_HOST }}       # IP ou domínio do servidor
+          username: ${{ secrets.CPANEL_USER }}   # Usuário do cPanel
+          key: ${{ secrets.CPANEL_KEY }}         # Chave privada SSH
+          script: |
+            # Navega até a pasta da aplicação
+            cd ~/hermeno   # ajuste para o diretório da sua app
+
+            # Atualiza o código
+            git pull origin master
+
+            # Instala dependências
+            npm install --production
+
+            # Aplica migrações do Prisma
+            npx prisma migrate deploy
+
+            # Reinicia a a
