@@ -10,23 +10,54 @@ jobs:
     name: 🎉 Deploy via SSH
     runs-on: ubuntu-latest
     steps:
-    - name: 🚚 Checkout do código
-      uses: actions/checkout@v4
+      - name: 🚚 Checkout do código
+        uses: actions/checkout@v4
 
-    - name: 🛠 Deploy via SSH
-      uses: appleboy/ssh-action@v0.1.10
-      with:
-        host: ${{ secrets.CPANEL_HOST }}
-        username: ${{ secrets.CPANEL_USER }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        port: 22
-        script: |
-          cd ~/hermeno/public_html
-          echo "Atualizando código..."
-          git pull origin master
-          echo "Instalando dependências..."
-          npm install --production
-          echo "Aplicando migrações do Prisma..."
-          npx prisma migrate deploy
-          echo "Reiniciando aplicação com PM2..."
-          pm2 restart minha-api || pm2 start src/app.js --name minha-api
+      - name: 🛡️ Deploy via SSH com backup e logs
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.CPANEL_HOST }}
+          username: ${{ secrets.CPANEL_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          envs: |
+            NODE_ENV=production
+            DATABASE_URL=${{ secrets.DATABASE_URL }}
+            JWT_SECRET=${{ secrets.JWT_SECRET }}
+          script: |
+            set -e  # interrompe se algum comando falhar
+            echo "======================================="
+            echo "Iniciando deploy da API Node.js"
+            echo "======================================="
+
+            # Diretórios
+            APP_DIR=~/hermeno/public_html
+            BACKUP_DIR=~/hermeno/backup_$(date +%Y%m%d%H%M%S)
+
+            # Backup rápido
+            echo "Criando backup da aplicação..."
+            mkdir -p $BACKUP_DIR
+            cp -r $APP_DIR/* $BACKUP_DIR/
+            echo "Backup salvo em $BACKUP_DIR"
+
+            # Atualiza o código
+            echo "Atualizando código..."
+            cd $APP_DIR
+            git reset --hard
+            git pull origin master
+
+            # Instala dependências
+            echo "Instalando dependências..."
+            npm install --production
+
+            # Aplica migrações do Prisma
+            echo "Aplicando migrações do Prisma..."
+            npx prisma migrate deploy
+
+            # Reinicia a aplicação com PM2
+            echo "Reiniciando aplicação com PM2..."
+            pm2 restart minha-api || pm2 start src/app.js --name minha-api
+
+            echo "======================================="
+            echo "✅ Deploy concluído com sucesso!"
+            echo "======================================="
