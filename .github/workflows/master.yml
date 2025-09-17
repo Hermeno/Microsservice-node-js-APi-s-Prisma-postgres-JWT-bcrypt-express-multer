@@ -47,7 +47,8 @@ jobs:
             # Clonando repositório para diretório temporário
             echo "Clonando repositório para diretório temporário..."
             rm -rf $TMP_DIR
-            git clone git@github.com:Hermeno/Microsservice-node-js-APi-s-Prisma-postgres-JWT-bcrypt-express-multer.git $TMP_DIR
+            git clone https://github.com/Hermeno/Microsservice-node-js-APi-s-Prisma-postgres-JWT-bcrypt-express-multer.git $TMP_DIR
+
 
             # Sincronizando arquivos para o diretório real (mantém .well-known etc)
             echo "Sincronizando arquivos para $APP_DIR..."
