@@ -1,4 +1,4 @@
-name: 🚀 Deploy completo da API Node.js
+name: 🚀 Deploy completo da API Node.js e agora com --omit de prisma pra rodar comandos
 
 on:
   push:
