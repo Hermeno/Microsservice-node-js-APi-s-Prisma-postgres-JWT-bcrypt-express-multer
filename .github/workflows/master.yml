@@ -1,4 +1,4 @@
-name: 🚀 Deploy completo da API Node.js e agora com --omit de prisma pra rodar comandos
+name: 🚀 Deploy completo da API Node.js
 
 on:
   push:
@@ -46,18 +46,23 @@ jobs:
             # Limpeza de cache antigo
             echo "Removendo node_modules antigo e cache..."
             rm -rf $APP_DIR/node_modules
-            rm -rf $APP_DIR/.next  # se estiver usando Next.js ou build cache
-            rm -rf $APP_DIR/dist   # se estiver usando build TypeScript
+            rm -rf $APP_DIR/.next  # Next.js
+            rm -rf $APP_DIR/dist   # build TypeScript
 
-            # Atualiza o código
-            echo "Atualizando código..."
+            # Atualiza ou clona o código
             cd $APP_DIR
-            git reset --hard
-            git pull origin master
+            if [ -d ".git" ]; then
+              echo "Atualizando repositório existente..."
+              git reset --hard
+              git pull origin master
+            else
+              echo "Clonando repositório pela primeira vez..."
+              git clone git@github.com:Hermeno/Microsservice-node-js-APi-s-Prisma-postgres-JWT-bcrypt-express-multer.git .
+            fi
 
             # Instala dependências
             echo "Instalando dependências..."
-            npm install --production
+            npm ci --omit=dev
 
             # Verifica arquivos importantes
             echo "Listando arquivos principais..."
@@ -66,15 +71,14 @@ jobs:
 
             # Aplica migrações do Prisma
             echo "Aplicando migrações do Prisma..."
-            npx prisma migrate deploy
+            npx prisma migrate deploy --schema=prisma/schema.prisma
 
             # Reinicia a aplicação com PM2
             echo "Reiniciando aplicação com PM2..."
             pm2 describe minha-api >/dev/null 2>&1 && pm2 restart minha-api || pm2 start src/app.js --name minha-api
 
             # Salva log do deploy
-            echo "Salvando log do deploy..."
-            date > $LOG_DIR/deploy_$(date +%Y%m%d%H%M%S).log
+            echo "Deploy concluído em $(date)" > $LOG_DIR/deploy_$(date +%Y%m%d%H%M%S).log
 
             echo "======================================="
             echo "✅ Deploy concluído com sucesso!"
