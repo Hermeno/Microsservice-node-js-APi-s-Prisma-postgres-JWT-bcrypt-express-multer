@@ -32,10 +32,10 @@ jobs:
             echo "======================================="
 
             # Diretórios principais
-            APP_DIR=~/hermeno/public_html
-            TMP_DIR=~/hermeno/tmp_app
-            BACKUP_DIR=~/hermeno/backup_$(date +%Y%m%d%H%M%S)
-            LOG_DIR=~/hermeno/deploy_logs
+            APP_DIR=~/public_html
+            TMP_DIR=~/tmp
+            BACKUP_DIR=~/backup_$(date +%Y%m%d%H%M%S)
+            LOG_DIR=~/deploy_logs
             mkdir -p $LOG_DIR
 
             # Backup rápido da app atual
