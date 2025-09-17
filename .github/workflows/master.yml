@@ -1,4 +1,4 @@
-name: 🚀 Deploy completo da API Node.js
+name: 🚀 Deploy completo da API Node.js com Node local
 
 on:
   push:
@@ -13,7 +13,7 @@ jobs:
       - name: 🚚 Checkout do código
         uses: actions/checkout@v4
 
-      - name: 🛡️ Deploy via SSH com backup, logs e variáveis
+      - name: 🛡️ Deploy via SSH com backup, logs e Node local
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.CPANEL_HOST }}
@@ -26,51 +26,57 @@ jobs:
             JWT_SECRET=${{ secrets.JWT_SECRET }}
             API_PORT=3000
           script: |
-            set -e  # interrompe se algum comando falhar
+            set -e
             echo "======================================="
             echo "Iniciando deploy da API Node.js"
             echo "======================================="
 
-            # Diretórios principais
+            # Diretórios
             APP_DIR=~/public_html
             TMP_DIR=~/tmp
             BACKUP_DIR=~/backup_$(date +%Y%m%d%H%M%S)
             LOG_DIR=~/deploy_logs
+            NODE_DIR=~/node
             mkdir -p $LOG_DIR
 
-            # Backup rápido da app atual
+            # Backup rápido
             echo "Criando backup da aplicação..."
             mkdir -p $BACKUP_DIR
             cp -r $APP_DIR/* $BACKUP_DIR/ || true
             echo "Backup salvo em $BACKUP_DIR"
 
             # Clonando repositório para diretório temporário
-            echo "Clonando repositório para diretório temporário..."
+            echo "Clonando repositório para $TMP_DIR..."
             rm -rf $TMP_DIR
             git clone https://github.com/Hermeno/Microsservice-node-js-APi-s-Prisma-postgres-JWT-bcrypt-express-multer.git $TMP_DIR
 
+            # Instalando Node.js local (somente se não existir)
+            if [ ! -d "$NODE_DIR" ]; then
+              echo "Instalando Node.js local..."
+              mkdir -p $NODE_DIR
+              cd $NODE_DIR
+              NODE_VERSION=v20.18.0
+              wget https://nodejs.org/dist/$NODE_VERSION/node-$NODE_VERSION-linux-x64.tar.xz
+              tar -xf node-$NODE_VERSION-linux-x64.tar.xz --strip-components=1
+              rm node-$NODE_VERSION-linux-x64.tar.xz
+            fi
 
-           
+            # Ajustando PATH para Node local
+            export PATH=$NODE_DIR/bin:$PATH
+            node -v
+            npm -v
+
             # Sincronizando arquivos para o diretório real
             echo "Sincronizando arquivos para $APP_DIR..."
             cp -r $TMP_DIR/* $APP_DIR/
             rm -rf $TMP_DIR
 
-
-
-
-
             # Entrando no diretório da aplicação
             cd $APP_DIR
 
-            # Instala dependências (omitindo dev)
+            # Instalando dependências
             echo "Instalando dependências..."
             npm ci --omit=dev
-
-            # Verificando arquivos principais
-            echo "Verificando arquivos..."
-            ls -l
-            ls -l node_modules
 
             # Aplicando migrações do Prisma
             echo "Aplicando migrações do Prisma..."
