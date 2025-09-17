@@ -31,25 +31,28 @@ jobs:
             echo "Iniciando deploy da API Node.js"
             echo "======================================="
 
-            # Diretórios
+            # Diretórios principais
             APP_DIR=~/hermeno/public_html
+            TMP_DIR=~/hermeno/tmp_app
             BACKUP_DIR=~/hermeno/backup_$(date +%Y%m%d%H%M%S)
             LOG_DIR=~/hermeno/deploy_logs
             mkdir -p $LOG_DIR
 
-            # Backup rápido
+            # Backup rápido da app atual
             echo "Criando backup da aplicação..."
             mkdir -p $BACKUP_DIR
-            cp -r $APP_DIR/* $BACKUP_DIR/
+            cp -r $APP_DIR/* $BACKUP_DIR/ || true
             echo "Backup salvo em $BACKUP_DIR"
 
-            # Limpeza do diretório antigo
-            echo "Limpando diretório da aplicação..."
-            rm -rf $APP_DIR/*
+            # Clonando repositório para diretório temporário
+            echo "Clonando repositório para diretório temporário..."
+            rm -rf $TMP_DIR
+            git clone git@github.com:Hermeno/Microsservice-node-js-APi-s-Prisma-postgres-JWT-bcrypt-express-multer.git $TMP_DIR
 
-            # Clonando repositório
-            echo "Clonando repositório..."
-            git clone git@github.com:Hermeno/Microsservice-node-js-APi-s-Prisma-postgres-JWT-bcrypt-express-multer.git $APP_DIR
+            # Sincronizando arquivos para o diretório real (mantém .well-known etc)
+            echo "Sincronizando arquivos para $APP_DIR..."
+            rsync -a --delete $TMP_DIR/ $APP_DIR/
+            rm -rf $TMP_DIR
 
             # Entrando no diretório da aplicação
             cd $APP_DIR
@@ -58,7 +61,7 @@ jobs:
             echo "Instalando dependências..."
             npm ci --omit=dev
 
-            # Listando arquivos principais
+            # Verificando arquivos principais
             echo "Verificando arquivos..."
             ls -l
             ls -l node_modules
@@ -67,7 +70,7 @@ jobs:
             echo "Aplicando migrações do Prisma..."
             npx prisma migrate deploy --schema=prisma/schema.prisma
 
-            # Reiniciando a aplicação com PM2
+            # Reiniciando aplicação com PM2
             echo "Reiniciando aplicação com PM2..."
             pm2 describe minha-api >/dev/null 2>&1 && pm2 restart minha-api || pm2 start src/app.js --name minha-api
 
