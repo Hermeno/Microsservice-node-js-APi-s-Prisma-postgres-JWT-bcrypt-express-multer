@@ -1,0 +1,29 @@
+import React from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import Layout from '../template/_layout';
+
+export default function Welcome() {
+  return (
+    <Layout>
+      <View style={styles.container}>
+        <Text style={styles.title}>BEM VINDO AO</Text>
+        <Text style={styles.logo}>Great-X</Text>
+
+
+
+        <TouchableOpacity
+          onPress={() => console.log('Get Started Pressed')}
+          style={{ marginTop: 20, padding: 0, backgroundColor: '#007bff', borderRadius: 10, paddingHorizontal: 40, paddingVertical: 10 }} 
+        >
+          <Text style={{ color: '#fff', fontSize: 16 }}>Começar</Text>  
+        </TouchableOpacity>
+      </View>
+    </Layout>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  title: { fontSize: 24, color: '#fff' },
+  logo: { fontSize: 32, color: '#00f' },
+});
